@@ -1,0 +1,4 @@
+(executable
+ (public_name calc_ans)
+ (name main)
+ (libraries calc_ans))
