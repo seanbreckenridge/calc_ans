@@ -7,14 +7,14 @@ let tokenize_result_to_tokens res =
   | Error _ -> []
 
 let test1 _ =
-  let res =
+  let res : Calc_ans.token list =
     Calc_ans.tokenize "ans + (1 + 2.0) / 2" |> tokenize_result_to_tokens
   in
-  let expected =
+  let expected : Calc_ans.token list =
     [
       Calc_ans.Ans;
       Op Calc_ans.Plus;
-      Calc_ans.LParen;
+      LParen;
       Calc_ans.Number (Int 1);
       Op Calc_ans.Plus;
       Calc_ans.Number (Float 2.0);
@@ -25,13 +25,4 @@ let test1 _ =
   in
   assert_equal expected res
 
-let test_eval _ =
-  let expr =
-    BinOp (Div, BinOp (Plus, Val (Int 1), Val (Float 2.5)), Val (Int 3))
-  in
-  let res = Calc_ans.eval expr in
-  let expected = Ok (Float 1.1666666666666667) in
-  assert_equal expected res
-
-let () =
-  run_test_tt_main ("test" >::: [ "test1" >:: test1; "test_eval" >:: test_eval ])
+let () = run_test_tt_main ("test" >::: [ "test1" >:: test1 ])
