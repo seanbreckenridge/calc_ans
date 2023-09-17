@@ -3,7 +3,6 @@
 set -e
 
 eval "$(opam env)"
-opam install --check dune || opam install dune
 echo "Building..." >&2
 dune build
 echo "Built binary at _build/default/bin/main.exe" >&2

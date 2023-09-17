@@ -22,6 +22,18 @@ let binop_to_string (op : bin_op) : string =
   | Mod -> "%"
   | Pow -> "^"
 
+let parse_binop_alias s =
+  match s with
+  | "a" -> Some Plus
+  | "p" -> Some Plus
+  | "m" -> Some Sub
+  | "t" -> Some Mul
+  | "d" -> Some Div
+  | _ -> None
+
+let is_binop_alias s =
+  match parse_binop_alias s with Some _ -> true | None -> false
+
 let func_to_string (func : func) : string =
   match func with
   | Abs -> "abs"
@@ -49,7 +61,7 @@ let string_to_number_unsafe (input : string) : number =
   else Int (int_of_string input)
 
 let number_to_string (num : number) : string =
-  match num with Int i -> string_of_int i | Float f -> string_of_float f
+  match num with Int i -> string_of_int i | Float f -> Printf.sprintf "%f" f
 
 let int_divide_if_divisible (i1 : number) (i2 : number) : number =
   match (i1, i2) with
@@ -224,6 +236,11 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_loc list)
             tokenize_aux input
               (cursor + String.length text_str)
               ((NullOp (parse_null_op null_op_str |> Option.get), cursor) :: acc)
+              depth
+        | _, op_str when is_binop_alias op_str ->
+            tokenize_aux input
+              (cursor + String.length text_str)
+              ((Op (parse_binop_alias op_str |> Option.get), cursor) :: acc)
               depth
         | num_str, _ when String.length num_str > 0 ->
             tokenize_aux input
@@ -494,9 +511,9 @@ let eval_func (f : func) (i1 : number) : (number, string) result =
   | Abs, Int i1 -> Ok (Int (abs i1))
   | Abs, Float f1 -> Ok (Float (abs_float f1))
   | Floor, Int i1 -> Ok (Int i1)
-  | Floor, Float f1 -> Ok (Float (floor f1))
+  | Floor, Float f1 -> Ok (Int (floor f1 |> int_of_float))
   | Ceil, Int i1 -> Ok (Int i1)
-  | Ceil, Float f1 -> Ok (Float (ceil f1))
+  | Ceil, Float f1 -> Ok (Int (ceil f1 |> int_of_float))
   | Round, Int i1 -> Ok (Int i1)
   | Round, Float f1 -> Ok (Int (round_float f1 |> int_of_float))
   | Sqrt, n1 -> (
