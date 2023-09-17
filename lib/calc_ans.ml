@@ -45,7 +45,7 @@ let divide_smart (i1 : number) (i2 : number) : (number, string) result =
 
 let rec eval (expr : expr) : (number, string) result =
   match expr with
-  | Val i -> Ok i
+  | Val i -> Ok i (* base case *)
   | BinOp (o, e1, e2) -> (
       match (e1, e2) with
       | Val (Int i1), Val (Int i2) -> (
@@ -85,12 +85,19 @@ type token_loc = token * int
 type token_list = token_loc list
 type error_loc = Str of string | WithLoc of string * int
 
+let point_to_error_text (error_loc : error_loc) (offset : int) : string =
+  match error_loc with
+  | Str e -> Printf.sprintf "Error: %s" e
+  | WithLoc (e, loc) ->
+      let pointer = String.make (loc + offset) ' ' ^ "^" in
+      pointer ^ "\n" ^ e
+
 let error_loc_with_pointer (error_loc : error_loc) (input : string) : string =
   match error_loc with
-  | Str e -> e
-  | WithLoc (e, loc) ->
-      let pointer = String.make loc ' ' ^ "^" in
-      input ^ "\n" ^ pointer ^ "\n" ^ e
+  | Str e -> Printf.sprintf "Error: %s" e
+  | WithLoc _ ->
+      let pointer = point_to_error_text error_loc 0 in
+      input ^ "\n" ^ pointer
 
 let token_loc_repr (token_loc : token_loc) : string =
   match token_loc with
@@ -103,23 +110,61 @@ let token_loc_repr (token_loc : token_loc) : string =
 let token_loc_list_repr (token_loc_list : token_loc list) : string =
   token_loc_list |> List.map token_loc_repr |> String.concat " "
 
+let find_last_unbalanced_paren (lst : token_loc list) : error_loc option =
+  let rec find_last_unbalanced_paren_aux (lst : token_loc list) (depth : int)
+      (paren_stack : token_loc list) : error_loc option =
+    match lst with
+    | [] -> (
+        match depth with
+        | 0 -> None
+        | _ -> (
+            match paren_stack with
+            | [] ->
+                failwith
+                  (Printf.sprintf "Depth %d but paren stack is empty" depth)
+            | (_, loc) :: _ ->
+                Some
+                  (WithLoc
+                     ( "Open parenthesis without matching closed parenthesis",
+                       loc ))))
+    | (LParen, loc) :: cons_stack ->
+        find_last_unbalanced_paren_aux cons_stack (depth + 1)
+          ((LParen, loc) :: paren_stack)
+    | (RParen, loc) :: cons_stack -> (
+        match paren_stack with
+        | [] ->
+            Some
+              (WithLoc
+                 ("Closed parenthesis without matching open parenthesis", loc))
+        | (LParen, _) :: parent_cons_stack ->
+            find_last_unbalanced_paren_aux cons_stack (depth - 1)
+              parent_cons_stack
+        | _ -> failwith "Paren stack should only contain LParens")
+    | _ :: rest -> find_last_unbalanced_paren_aux rest depth paren_stack
+  in
+  find_last_unbalanced_paren_aux lst 0 []
+
 let rec tokenize_aux (input : string) (cursor : int) (acc : token_list)
     (depth : int) : (token_loc list, error_loc) result =
   if cursor >= String.length input then
+    let tokens_rev = acc |> List.rev in
     match depth with
-    | 0 -> Ok (acc |> List.rev)
-    | _ -> Error (Str "Unbalanced parentheses")
+    | 0 -> Ok tokens_rev
+    | _ -> (
+        match find_last_unbalanced_paren tokens_rev with
+        | None -> Ok tokens_rev
+        | Some error_loc -> Error error_loc)
   else
     let c = String.get input cursor in
     match c with
-    | ' ' -> tokenize_aux input (cursor + 1) acc depth
+    | '\n' | '\r' -> Error (Str "Newline not allowed in input")
+    | ' ' | '\t' -> tokenize_aux input (cursor + 1) acc depth
     | '+' -> tokenize_aux input (cursor + 1) ((Op Plus, cursor) :: acc) depth
     | '-' -> tokenize_aux input (cursor + 1) ((Op Sub, cursor) :: acc) depth
     | '*' -> tokenize_aux input (cursor + 1) ((Op Mul, cursor) :: acc) depth
     | '/' -> tokenize_aux input (cursor + 1) ((Op Div, cursor) :: acc) depth
     | '%' -> tokenize_aux input (cursor + 1) ((Op Mod, cursor) :: acc) depth
     | '^' -> tokenize_aux input (cursor + 1) ((Op Pow, cursor) :: acc) depth
-    | 'a' -> tokenize_aux input (cursor + 1) ((Ans, cursor) :: acc) depth
     | '(' ->
         tokenize_aux input (cursor + 1) ((LParen, cursor) :: acc) (depth + 1)
     | ')' ->
@@ -136,13 +181,25 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_list)
             | '.' -> read_number input (cursor + 1) (acc ^ String.make 1 c)
             | _ -> acc
         in
+        let rec read_text (input : string) (cursor : int) (acc : string) :
+            string =
+          if cursor >= String.length input then acc
+          else
+            let c = String.get input cursor in
+            match c with
+            | 'a' .. 'z' | 'A' .. 'Z' ->
+                read_text input (cursor + 1) (acc ^ String.make 1 c)
+            | _ -> acc
+        in
         let num_str = read_number input cursor "" in
+        let text_str = read_text input cursor "" |> String.lowercase_ascii in
         (* if nothing could be read here, then we couldn't read an int or float, so its an unknown character *)
-        match num_str |> String.length with
-        | 0 ->
-            Error
-              (WithLoc ("Unknown character '" ^ String.make 1 c ^ "'", cursor))
-        | _ ->
+        match (num_str, text_str) with
+        | _, "ans" ->
+            tokenize_aux input
+              (cursor + String.length text_str)
+              ((Ans, cursor) :: acc) depth
+        | num_str, _ when String.length num_str > 0 ->
             let num =
               if String.contains num_str '.' then
                 Float (float_of_string num_str)
@@ -151,6 +208,14 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_list)
             tokenize_aux input
               (cursor + String.length num_str)
               ((Number num, cursor) :: acc)
-              depth)
+              depth
+        | _, _ ->
+            if String.length text_str > 0 then
+              Error
+                (WithLoc ("Unknown token in input: '" ^ text_str ^ "'", cursor))
+            else
+              Error
+                (WithLoc ("Unknown character '" ^ String.make 1 c ^ "'", cursor))
+        )
 
 let tokenize (input : string) = tokenize_aux input 0 [] 0
