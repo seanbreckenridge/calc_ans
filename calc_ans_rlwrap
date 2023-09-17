@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+TOKENS="${HOME}/.local/share/calc_ans/tokens"
+CACHE_FILE="${CACHE_DIR}/calc_ans_history.txt"
+
+exec rlwrap -H "${CACHE_FILE}" calc_ans -f "${TOKENS}" calc_ans "$@"

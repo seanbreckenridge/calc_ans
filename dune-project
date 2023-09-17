@@ -5,22 +5,22 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github seanbreckenridge/calc_ans))
 
-(authors "Author Name")
+(authors "Sean Breckenridge")
 
-(maintainers "Maintainer Name")
+(maintainers "Sean Breckenridge")
 
-(license LICENSE)
+(license MIT)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/seanbreckenridge/calc_ans)
 
 (package
  (name calc_ans)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "A simple REPL calculator")
+ (description "A simple REPL calculator, supports +, -, *, /, ^, %, parens, abs, floor, ceil, round and sqrt, with a persistent memory of the last answer")
  (depends ocaml dune)
  (tags
-  (topics "to describe" your project)))
+  (topics cli math calculator)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

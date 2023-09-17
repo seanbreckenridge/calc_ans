@@ -5,14 +5,25 @@ type options = { debug : bool; args : string option }
 let parse_args () : options =
   let debug = ref false in
   let args = ref None in
+  let completion = ref false in
   let speclist =
     [
+      ("-C", Arg.Set completion, "print tokens for completion");
       ("-d", Arg.Set debug, "Enable debug mode");
       ("-e", Arg.String (fun s -> args := Some s), "Input expression");
     ]
   in
-  let usage_msg = "Usage: calc_ans [-d] [-e <expr>]" in
+  let usage_msg = "Usage: calc_ans [-d] [-C] [-e <expr>]" in
   let () = Arg.parse speclist print_endline usage_msg in
+  let () =
+    match !completion with
+    | true ->
+        let () =
+          tokens_for_completion () |> String.concat "\n" |> print_endline
+        in
+        exit 0
+    | false -> ()
+  in
   { debug = !debug; args = !args }
 
 let read_line_opt () : string option =
@@ -22,15 +33,15 @@ let debug_print (debug : bool) (s : string) =
   if debug then prerr_endline ("[DEBUG] " ^ s) else ()
 
 let parse_ast (tokens : token_loc list) (opts : options) :
-    postfix_expr_token list =
+    postfix_expr_token_loc list =
   debug_print opts.debug (token_loc_list_repr tokens);
   let tokens_loc_postfix = tokens |> tokens_to_postfix in
   let tokens_postfix = tokens_loc_postfix |> List.map fst in
   debug_print opts.debug (postfix_expr_token_list_to_string tokens_postfix);
-  tokens_postfix
+  tokens_loc_postfix
 
-let repl (opts : options) =
-  let rec loop (opts : options) =
+let start_repl (opts : options) : unit =
+  let rec loop (opts : options) (prev_result : number option) =
     let prompt_str = "> " in
     let () = print_string prompt_str in
     let input = read_line_opt () in
@@ -41,21 +52,30 @@ let repl (opts : options) =
         match tokens_res with
         | Error e ->
             print_endline (point_to_error_text e (String.length prompt_str));
-            loop opts
-        | Ok tokens ->
-            let _ = parse_ast tokens opts in
-            loop opts)
+            loop opts None
+        | Ok tokens -> (
+            let ast = parse_ast tokens opts in
+            let result = eval_postfix_expression ast prev_result in
+            match result with
+            | Ok num ->
+                Printf.printf "%s\n" (number_to_string num);
+                loop opts (Some num)
+            | Error e ->
+                print_endline (point_to_error_text e (String.length prompt_str));
+                loop opts prev_result))
   in
-  loop opts
+  loop opts None
 
 let () =
-  let args = parse_args () in
-  match args.args with
-  | None -> repl args
+  let opts = parse_args () in
+  match opts.args with
+  | None ->
+      let _ = start_repl opts in
+      ()
   | Some token_input -> (
       let tokens_res = tokenize token_input in
       match tokens_res with
       | Error e -> print_endline (error_loc_with_pointer e token_input)
       | Ok tokens ->
-          let _ = parse_ast tokens args in
+          let _ = parse_ast tokens opts in
           ())
