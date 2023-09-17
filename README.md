@@ -47,7 +47,15 @@ dune build
 cp _build/default/bin/main.exe ~/.local/bin/calc_ans
 ```
 
-Installs `calc_ans` and `calc_ans_rlwrap` to `~/.local/bin/`. `calc_ans_rlwrap` is a wrapper around `calc_ans` which uses [`rlwrap`](https://github.com/hanslub42/rlwrap) to provide readline functionality (history, arrow keys, line-editing, etc.)
+Installs `calc_ans` and `calc_ans_rlwrap` to `~/.local/bin/`. `calc_ans_rlwrap` is a wrapper around `calc_ans` which uses [`rlwrap`](https://github.com/hanslub42/rlwrap) to provide readline functionality (a persistent history, arrow keys, line-editing, etc.)
+
+I alias `calc_ans_rlwrap` to `c` in my shell:
+
+```bash
+alias c='calc_ans_rlwrap'
+```
+
+To install `opam`/`dune` to build this on `termux`, see [notes on installing opam](https://exobrain.sean.fish/devlog/ocaml_android/) and [dune issue](https://github.com/ocaml/dune/issues/8676) for a patch.
 
 ## Usage
 
