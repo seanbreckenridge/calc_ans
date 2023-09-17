@@ -81,12 +81,12 @@ $ calc_ans -e 'round(2 ^ 20 / 5)'
 
 You can also use aliases instead of the symbols:
 
-| Alias | Symbol |
-| ----- | ------ |
-| `+`   | a, p   |
-| `-`   | m      |
-| `*`   | t      |
-| `/`   | d      |
+| Symbol | Alias  |
+| ------ | ------ |
+| `+`    | a, p   |
+| `-`    | m      |
+| `*`    | t      |
+| `/`    | d      |
 
 ### Precision
 
@@ -102,7 +102,7 @@ So, the goals for this were:
 
 - fast boot time
 - last answer is assumed as the left-hand side if an operand is missing
-- adding aliases for the basic operators
+- aliases for the basic operators so I don't have to switch keyboard layouts
 - being forgiving with whitespace/parentheses
 - decent error messages
 
@@ -125,7 +125,7 @@ Need two operands for operator
 
 Parsing negative numbers vs. subtraction is a bit weird. Currently, if this finds a `-`, it does lookahead to figure out if its a negative number or subtraction. So, if you provide an expression like `4-3`, it parses it as two numbers `4` `-3`, instead of `4 - 3`. This can be fixed by using spaces between the input like `4 - 3`, or by using the subtraction alias `4m3`
 
-```python
+```
 > 4-3
 Error: Malformed expression, multiple values without operator or function. Stack contents: 4 -3
 > 4 - 3
