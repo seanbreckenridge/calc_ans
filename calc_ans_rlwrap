@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 TOKENS="${HOME}/.local/share/calc_ans/tokens"
+CACHE_DIR="${XDG_CACHE_HOME:-${HOME}/.cache}/calc_ans"
+
+mkdir -p "${CACHE_DIR}"
 CACHE_FILE="${CACHE_DIR}/calc_ans_history.txt"
 
-exec rlwrap -H "${CACHE_FILE}" calc_ans -f "${TOKENS}" calc_ans "$@"
+exec rlwrap -H "${CACHE_FILE}" -f "${TOKENS}" calc_ans "$@"

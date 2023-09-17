@@ -2,12 +2,13 @@ type bin_op = Plus | Sub | Mul | Div | Mod | Pow
 type func = Abs | Floor | Ceil | Round | Sqrt
 
 (* items which take no arguments as input *)
-type null_op = Epoch
+type null_op = Epoch | Pi
 
-let null_op_to_string (op : null_op) : string = match op with Epoch -> "epoch"
+let null_op_to_string (op : null_op) : string =
+  match op with Epoch -> "epoch" | Pi -> "pi"
 
 let parse_null_op (input : string) : null_op option =
-  match input with "epoch" -> Some Epoch | _ -> None
+  match input with "epoch" -> Some Epoch | "pi" -> Some Pi | _ -> None
 
 let is_null_op (input : string) : bool =
   match parse_null_op input with Some _ -> true | None -> false
@@ -484,10 +485,9 @@ let eval_binary_operation (op : bin_op) (i1 : number) (i2 : number) :
 
 let round_float (f : float) : float =
   let frac_part = f -. floor f in
-  if f < 0.0 then
-    if frac_part > 0.5 then ceil f else floor f
-  else
-    if frac_part >= 0.5 then ceil f else floor f
+  if f < 0.0 then if frac_part > 0.5 then ceil f else floor f
+  else if frac_part >= 0.5 then ceil f
+  else floor f
 
 let eval_func (f : func) (i1 : number) : (number, string) result =
   match (f, i1) with
@@ -510,7 +510,9 @@ let eval_func (f : func) (i1 : number) : (number, string) result =
         | Float f1 -> Ok (Float (sqrt f1)))
 
 let eval_null_op (op : null_op) : number =
-  match op with Epoch -> Int (int_of_float (Unix.time ()))
+  match op with
+  | Epoch -> Int (int_of_float (Unix.time ()))
+  | Pi -> Float Float.pi
 
 let eval_null_expressions (ast : postfix_expr_token_loc list) :
     postfix_expr_token_loc list =
@@ -521,13 +523,14 @@ let eval_null_expressions (ast : postfix_expr_token_loc list) :
          | other -> (other, loc))
 
 let eval_postfix_expression (ast : postfix_expr_token_loc list)
-    (prev_ans : number option) : (number, error_loc) result =
+    (prev_ans : number option) (debug_func : string -> unit) :
+    (number, error_loc) result =
   let rec eval_postfix_aux (ast : postfix_expr_token_loc list)
       (stack : (number * int) list) : (number, error_loc) result =
     match ast with
     | [] -> (
-        match stack, prev_ans with
-        | [], None-> Error (Str "Empty expression")
+        match (stack, prev_ans) with
+        | [], None -> Error (Str "Empty expression")
         | [], Some ans -> Ok ans
         | (v, _) :: [], _ -> Ok v
         | _ ->
@@ -556,6 +559,11 @@ let eval_postfix_expression (ast : postfix_expr_token_loc list)
         match args with
         | Error e -> Error e
         | Ok (i1, i2) -> (
+            let () =
+              debug_func
+                (Printf.sprintf "Evaluating %s %s %s" (number_to_string i1)
+                   (binop_to_string o) (number_to_string i2))
+            in
             match eval_binary_operation o i1 i2 with
             | Ok result -> eval_postfix_aux rest ((result, l) :: new_stack)
             | Error e -> Error (WithLoc (e, l))))
@@ -570,6 +578,11 @@ let eval_postfix_expression (ast : postfix_expr_token_loc list)
         match num with
         | Error e -> Error e
         | Ok i1 -> (
+            let () =
+              debug_func
+                (Printf.sprintf "Evaluating %s %s" (func_to_string f)
+                   (number_to_string i1))
+            in
             match eval_func f i1 with
             | Ok result -> eval_postfix_aux rest ((result, l) :: new_stack)
             | Error e -> Error (WithLoc (e, l))))
@@ -579,4 +592,4 @@ let eval_postfix_expression (ast : postfix_expr_token_loc list)
   eval_postfix_aux (eval_null_expressions ast) []
 
 let tokens_for_completion () =
-  [ "abs"; "floor"; "ceil"; "round"; "sqrt"; "epoch" ]
+  [ "abs"; "floor"; "ceil"; "round"; "sqrt"; "epoch"; "pi" ]
