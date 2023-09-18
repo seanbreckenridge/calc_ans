@@ -23,7 +23,7 @@ If you don't provide an expression, it uses the last answer as the left-hand sid
 
 Supports:
 
-- `+`, `-`, `*`, `/`, `^` (exponentiation), `%` (modulo)
+- `+`, `-`, `*`, `/`, `^` (exponentiation), `%` (modulo), or their [aliases](#aliases)
 - `ceil`, `floor`, `abs`, `round`, `sqrt`
 - `epoch` (current time in seconds since the Unix epoch), `pi`
 - `ans` (last answer)
@@ -86,6 +86,8 @@ $ calc_ans -d
 $ calc_ans -e 'round(2 ^ 20 / 5)'
 209715
 ```
+
+### Aliases
 
 You can also use aliases instead of the symbols:
 

@@ -65,7 +65,7 @@ let start_repl (opts : options) : unit =
         match tokens_res with
         | Error e ->
             print_endline (point_to_error_text e (String.length prompt_str));
-            loop opts None
+            loop opts prev_result
         | Ok tokens -> (
             let ast = parse_ast tokens opts in
             let result = eval_postfix_expression ast prev_result debug_func in
