@@ -57,7 +57,7 @@ I alias `calc_ans_rlwrap` to `c` in my shell:
 alias c='calc_ans_rlwrap'
 ```
 
-To install `opam`/`dune` to build this on `termux`, see [notes on installing opam](https://exobrain.sean.fish/devlog/ocaml_android/) and [dune issue](https://github.com/ocaml/dune/issues/8676) for a patch.
+To install `opam`/`dune` to build this on `termux`, see [notes on installing opam](https://exobrain.sean.fish/devlog/ocaml_android/) and [dune issue](https://github.com/ocaml/dune/issues/8676#issuecomment-1722574714) for a patch.
 
 ## Usage
 
