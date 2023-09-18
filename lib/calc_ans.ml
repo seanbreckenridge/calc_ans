@@ -1,6 +1,3 @@
-type bin_op = Plus | Sub | Mul | Div | Mod | Pow
-type func = Abs | Floor | Ceil | Round | Sqrt
-
 (* items which take no arguments as input *)
 type null_op = Epoch | Pi
 
@@ -13,12 +10,16 @@ let parse_null_op (input : string) : null_op option =
 let is_null_op (input : string) : bool =
   match parse_null_op input with Some _ -> true | None -> false
 
+(* binary operators (take two arguments as input) *)
+type bin_op = Plus | Sub | Mul | Div | Mod | Pow | FloorDiv
+
 let binop_to_string (op : bin_op) : string =
   match op with
   | Plus -> "+"
   | Sub -> "-"
   | Mul -> "*"
   | Div -> "/"
+  | FloorDiv -> "//"
   | Mod -> "%"
   | Pow -> "^"
 
@@ -33,6 +34,9 @@ let parse_binop_alias s =
 
 let is_binop_alias s =
   match parse_binop_alias s with Some _ -> true | None -> false
+
+(* functions (take one argument as input) *)
+type func = Abs | Floor | Ceil | Round | Sqrt
 
 let func_to_string (func : func) : string =
   match func with
@@ -105,6 +109,7 @@ let token_to_string (token : token) : string =
   | Func f -> func_to_string f
   | NullOp o -> null_op_to_string o
 
+(* returns a string with a pointer (^) to the correct column *)
 let point_to_error_text (error_loc : error_loc) (offset : int) : string =
   match error_loc with
   | Str e -> Printf.sprintf "Error: %s" e
@@ -194,6 +199,15 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_loc list)
     if cursor >= String.length input then false
     else read_number input cursor "" |> String.length > 0
   in
+  let peek_char (input : string) (cursor : int) : char option =
+    if cursor >= String.length input then None
+    else Some (String.get input cursor)
+  in
+  let next_char_is (input : string) (cursor : int) (c : char) : bool =
+    match peek_char input cursor with
+    | None -> false
+    | Some next_c -> next_c = c
+  in
   if cursor >= String.length input then
     let tokens_rev = acc |> List.rev in
     match depth with
@@ -211,6 +225,8 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_loc list)
     | '-' when not (peek_num_exists input (cursor + 1)) ->
         tokenize_aux input (cursor + 1) ((Op Sub, cursor) :: acc) depth
     | '*' -> tokenize_aux input (cursor + 1) ((Op Mul, cursor) :: acc) depth
+    | '/' when next_char_is input (cursor + 1) '/' ->
+        tokenize_aux input (cursor + 2) ((Op FloorDiv, cursor) :: acc) depth
     | '/' -> tokenize_aux input (cursor + 1) ((Op Div, cursor) :: acc) depth
     | '%' -> tokenize_aux input (cursor + 1) ((Op Mod, cursor) :: acc) depth
     | '^' -> tokenize_aux input (cursor + 1) ((Op Pow, cursor) :: acc) depth
@@ -260,7 +276,7 @@ let tokenize (input : string) = tokenize_aux input 0 [] 0
 
 let operator_precedence (tk : token) : int =
   match tk with
-  | Op o -> ( match o with Plus | Sub -> 1 | Mul | Div | Mod -> 2 | Pow -> 3)
+  | Op o -> ( match o with Plus | Sub -> 1 | Mul | Div | Mod -> 2 | Pow -> 3 | FloorDiv -> 2)
   | _ -> failwith "Fatal: operator_precedence called on non-operator"
 
 let token_is_left_associative (token : token) : bool =
@@ -475,6 +491,12 @@ let tokens_to_postfix (tokens : token_loc list) : postfix_expr_token_loc list =
   in
   parse_expr_aux tokens [] []
 
+let floor_divide (i1 : number) (i2 : number) : (number, string) result =
+  let i1_int = match i1 with Int i1 -> i1 | Float f1 -> int_of_float f1 in
+  let i2_int = match i2 with Int i2 -> i2 | Float f2 -> int_of_float f2 in
+  if i2_int = 0 then Error "Cannot divide by zero"
+  else Ok (Int (i1_int / i2_int))
+
 let eval_binary_operation (op : bin_op) (i1 : number) (i2 : number) :
     (number, string) result =
   match (op, i1, i2) with
@@ -491,6 +513,7 @@ let eval_binary_operation (op : bin_op) (i1 : number) (i2 : number) :
   | Mul, Float f1, Int i2 -> Ok (Float (f1 *. float_of_int i2))
   | Mul, Float f1, Float f2 -> Ok (Float (f1 *. f2))
   | Div, i1, i2 -> divide_smart i1 i2
+  | FloorDiv, i1, i2 -> floor_divide i1 i2
   | Mod, Int i1, Int i2 -> Ok (Int (i1 mod i2))
   | Mod, Int i1, Float f2 -> Ok (Float (mod_float (float_of_int i1) f2))
   | Mod, Float f1, Int i2 -> Ok (Float (mod_float f1 (float_of_int i2)))

@@ -23,7 +23,7 @@ If you don't provide an expression, it uses the last answer as the left-hand sid
 
 Supports:
 
-- `+`, `-`, `*`, `/`, `^` (exponentiation), `%` (modulo), or their [aliases](#aliases)
+- `+`, `-`, `*`, `/`, `//` (floor divide) `^` (exponentiation), `%` (modulo), or their [aliases](#aliases)
 - `ceil`, `floor`, `abs`, `round`, `sqrt`
 - `epoch` (current time in seconds since the Unix epoch), `pi`
 - `ans` (last answer)
