@@ -47,7 +47,7 @@ dune build
 cp _build/default/bin/main.exe ~/.local/bin/calc_ans
 ```
 
-Installs `calc_ans` and `calc_ans_rlwrap` to `~/.local/bin/`. `calc_ans_rlwrap` is a wrapper around `calc_ans` which uses [`rlwrap`](https://github.com/hanslub42/rlwrap) to provide readline functionality (a persistent history, arrow keys, line-editing, etc.)
+Installs `calc_ans` and `calc_ans_rlwrap` to `~/.local/bin/`. `calc_ans_rlwrap` is a wrapper around `calc_ans` which uses [`rlwrap`](https://github.com/hanslub42/rlwrap) to provide readline functionality (a persistent history, arrow keys, line-editing, search with <CTRL+R>)
 
 I alias `calc_ans_rlwrap` to `c` in my shell:
 
