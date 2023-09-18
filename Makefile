@@ -2,7 +2,7 @@ TARGET_BIN="${HOME}/.local/bin"
 TARGET_SHARE="${HOME}/.local/share"
 TARGET_EXE=_build/default/bin/main.exe
 
-$(TARGET_EXE): bin/dune bin/main.ml lib/calc_ans.ml lib/dune calc_ans.opam dune-project tokens
+$(TARGET_EXE): bin/dune bin/main.ml lib/calc_ans.ml lib/dune calc_ans.opam dune-project tokens build
 	@ bash ./build
 
 install: $(TARGET_EXE) files
