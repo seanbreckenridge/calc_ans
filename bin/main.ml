@@ -61,6 +61,11 @@ let start_repl (opts : options) : unit =
     match input with
     | None -> Printf.printf "\n"
     | Some input -> (
+        let () =
+          match input |> String.trim with
+          | "q" | "quit" | "exit" -> exit 0
+          | _ -> ()
+        in
         let tokens_res = tokenize input in
         match tokens_res with
         | Error e ->

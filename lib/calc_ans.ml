@@ -609,4 +609,4 @@ let eval_postfix_expression (ast : postfix_expr_token_loc list)
   eval_postfix_aux (eval_null_expressions ast) []
 
 let tokens_for_completion () =
-  [ "abs"; "floor"; "ceil"; "round"; "sqrt"; "epoch"; "pi" ]
+  [ "abs"; "floor"; "ceil"; "round"; "sqrt"; "epoch"; "pi"; "quit"; "exit" ]
