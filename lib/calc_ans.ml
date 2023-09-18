@@ -276,7 +276,7 @@ let tokenize (input : string) = tokenize_aux input 0 [] 0
 
 let operator_precedence (tk : token) : int =
   match tk with
-  | Op o -> ( match o with Plus | Sub -> 1 | Mul | Div | Mod -> 2 | Pow -> 3 | FloorDiv -> 2)
+  | Op o -> ( match o with Plus | Sub -> 1 | Mul | Div | Mod | FloorDiv -> 2 | Pow -> 3)
   | _ -> failwith "Fatal: operator_precedence called on non-operator"
 
 let token_is_left_associative (token : token) : bool =
