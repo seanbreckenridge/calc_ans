@@ -15,3 +15,6 @@ files:
 	@mkdir -p $(TARGET_SHARE)/calc_ans
 	@cp -v ./tokens $(TARGET_SHARE)/calc_ans/tokens
 	@cp -v ./calc_ans_rlwrap $(TARGET_BIN)
+
+clean:
+	rm -rf _build
