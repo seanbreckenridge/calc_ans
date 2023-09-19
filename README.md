@@ -120,7 +120,7 @@ So, the goals for this were:
 - being forgiving with whitespace/parentheses
 - decent error messages
 
-This was my first time ever writing `ocaml`, and I wanted to write something that I'd actually use. I knew it would be nice to write something related to parsing (it was indeed), and I've never handled tokenizing/parsing postfix notation manually (I have used [antlr](https://www.antlr.org/) and [pest.rs](https://pest.rs/)).
+This was my first time ever writing `ocaml`, and I wanted to write something that I'd actually use. I knew it would be nice to write something related to parsing (it was indeed), and I've never handled tokenizing/parsing postfix notation manually (though I have used [antlr](https://www.antlr.org/) and [pest.rs](https://pest.rs/)).
 
 This parses the tokens using `match` expressions, and then parses it into postfix notation using the [Shunting-yard algorithm](https://en.wikipedia.org/wiki/Shunting-yard_algorithm). Then, it evaluates the postfix notation using a stack, using your previous answer if its missing an operand.
 
