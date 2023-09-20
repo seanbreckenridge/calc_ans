@@ -25,7 +25,7 @@ Supports:
 
 - `+`, `-`, `*`, `/`, `//` (floor divide) `^` (exponentiation), `%` (modulo), or their [aliases](#aliases)
 - `ceil`, `floor`, `abs`, `round`, `sqrt`
-- `epoch` (current time in seconds since the Unix epoch), `pi`
+- `epoch` (current time in seconds since the Unix epoch), `pi`, `rand`
 - `ans` (last answer)
 
 This is optimized for my use-case on my phone with [`termux`](https://termux.dev/en/), so it has a fast boot time, and is forgiving with whitespace/parentheses, and has aliases for the basic operators, see [about](#about) for more details.

@@ -1,11 +1,15 @@
 (* items which take no arguments as input *)
-type null_op = Epoch | Pi
+type null_op = Epoch | Pi | Rand
 
 let null_op_to_string (op : null_op) : string =
-  match op with Epoch -> "epoch" | Pi -> "pi"
+  match op with Epoch -> "epoch" | Pi -> "pi" | Rand -> "rand"
 
 let parse_null_op (input : string) : null_op option =
-  match input with "epoch" -> Some Epoch | "pi" -> Some Pi | _ -> None
+  match input with
+  | "epoch" -> Some Epoch
+  | "pi" -> Some Pi
+  | "rand" -> Some Rand
+  | _ -> None
 
 let is_null_op (input : string) : bool =
   match parse_null_op input with Some _ -> true | None -> false
@@ -276,7 +280,11 @@ let tokenize (input : string) = tokenize_aux input 0 [] 0
 
 let operator_precedence (tk : token) : int =
   match tk with
-  | Op o -> ( match o with Plus | Sub -> 1 | Mul | Div | Mod | FloorDiv -> 2 | Pow -> 3)
+  | Op o -> (
+      match o with
+      | Plus | Sub -> 1
+      | Mul | Div | Mod | FloorDiv -> 2
+      | Pow -> 3)
   | _ -> failwith "Fatal: operator_precedence called on non-operator"
 
 let token_is_left_associative (token : token) : bool =
@@ -553,6 +561,7 @@ let eval_null_op (op : null_op) : number =
   match op with
   | Epoch -> Int (int_of_float (Unix.time ()))
   | Pi -> Float Float.pi
+  | Rand -> Float (Random.float 1.0)
 
 let eval_null_expressions (ast : postfix_expr_token_loc list) :
     postfix_expr_token_loc list =
@@ -632,4 +641,16 @@ let eval_postfix_expression (ast : postfix_expr_token_loc list)
   eval_postfix_aux (eval_null_expressions ast) []
 
 let tokens_for_completion () =
-  [ "abs"; "floor"; "ceil"; "round"; "sqrt"; "epoch"; "pi"; "quit"; "exit" ]
+  [
+    "abs";
+    "floor";
+    "ceil";
+    "round";
+    "sqrt";
+    "epoch";
+    "pi";
+    "quit";
+    "exit";
+    "rand";
+    "ans";
+  ]
