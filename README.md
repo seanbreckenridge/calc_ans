@@ -97,12 +97,12 @@ $ calc_ans -e 'round(2 ^ 20 / 5)'
 
 You can also use aliases instead of the symbols:
 
-| Symbol | Alias  |
-| ------ | ------ |
-| `+`    | a, p   |
-| `-`    | m      |
-| `*`    | t      |
-| `/`    | d      |
+| Symbol | Alias |
+| ------ | ----- |
+| `+`    | a, p  |
+| `-`    | m     |
+| `*`    | t     |
+| `/`    | d     |
 
 ### Precision
 
