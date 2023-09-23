@@ -26,6 +26,51 @@ let parse_args () : options =
   in
   { debug = !debug; args = !args }
 
+(* Supports: *)
+(**)
+(*     +, -, *, /, // (floor divide) ^ (exponentiation), % (modulo), or their aliases *)
+(*     ceil, floor, abs, round, sqrt *)
+(*     epoch (current time in seconds since the Unix epoch), pi, rand *)
+(*     ans (last answer) *)
+(**)
+
+let print_help () =
+  let help_str =
+    "##################################################\n\
+     A CLI REPL for evaluating mathematical expressions\n\
+     ##################################################\n\n\
+     Examples:\n\
+     > 5 + 10.5\n\
+     15.5\n\
+     # assumes the last answer as the left-hand side\n\
+     > / 5\n\
+     3.1\n\
+     > ceil  # rounds up\n\
+     4\n\
+     > round (1 + sqrt(-4 ^ 4) * 5)\n\
+     81\n\
+     > (88 - ans)\n\
+     7\n\n\
+     If you don't provide an expression, it will assume the left hand side is \
+     the last answer.\n\n\
+     Anything after a '#' is a comment.\n\n\
+     ##################################################\n\n\
+     Supported operators:\n\n\
+     +, -, *, /, // (floor divide) ^ (exponentiation), % (modulo)\n\
+     ceil, floor, abs, round, sqrt\n\
+     epoch (current time in seconds since the Unix epoch), pi, rand\n\
+     ans (last answer)\n\n\
+     Aliases:\n\n\
+     + | a, p\n\
+     - | m\n\
+     * | t\n\
+     / | d\n\n\
+     E.g:\n\
+     > 3 p 10 # (3 + 10)\n\
+     13"
+  in
+  print_endline help_str
+
 let read_line_opt () : string option =
   try Some (read_line ()) with End_of_file -> None
 
@@ -61,26 +106,30 @@ let start_repl (opts : options) : unit =
     match input with
     | None -> Printf.printf "\n"
     | Some input -> (
-        let () =
-          match input |> String.trim with
-          | "q" | "quit" | "exit" -> exit 0
-          | _ -> ()
-        in
-        let tokens_res = tokenize input in
-        match tokens_res with
-        | Error e ->
-            print_endline (point_to_error_text e (String.length prompt_str));
+        match input |> String.trim with
+        | "q" | "quit" | "exit" -> exit 0
+        | "h" | "help" ->
+            let () = print_help () in
             loop opts prev_result
-        | Ok tokens -> (
-            let ast = parse_ast tokens opts in
-            let result = eval_postfix_expression ast prev_result debug_func in
-            match result with
-            | Ok num ->
-                Printf.printf "%s\n" (number_to_string num);
-                loop opts (Some num)
+        | _ -> (
+            let tokens_res = tokenize input in
+            match tokens_res with
             | Error e ->
                 print_endline (point_to_error_text e (String.length prompt_str));
-                loop opts prev_result))
+                loop opts prev_result
+            | Ok tokens -> (
+                let ast = parse_ast tokens opts in
+                let result =
+                  eval_postfix_expression ast prev_result debug_func
+                in
+                match result with
+                | Ok num ->
+                    Printf.printf "%s\n" (number_to_string num);
+                    loop opts (Some num)
+                | Error e ->
+                    print_endline
+                      (point_to_error_text e (String.length prompt_str));
+                    loop opts prev_result)))
   in
   loop opts None
 

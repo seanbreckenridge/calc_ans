@@ -225,6 +225,8 @@ let rec tokenize_aux (input : string) (cursor : int) (acc : token_loc list)
     match c with
     | '\n' | '\r' -> Error (Str "Newline not allowed in input")
     | ' ' | '\t' -> tokenize_aux input (cursor + 1) acc depth
+    (* comments should be ignored, end the tokenizing *)
+    | '#' -> tokenize_aux input (String.length input) acc depth
     | '+' -> tokenize_aux input (cursor + 1) ((Op Plus, cursor) :: acc) depth
     | '-' when not (peek_num_exists input (cursor + 1)) ->
         tokenize_aux input (cursor + 1) ((Op Sub, cursor) :: acc) depth
@@ -653,4 +655,5 @@ let tokens_for_completion () =
     "exit";
     "rand";
     "ans";
+    "help";
   ]

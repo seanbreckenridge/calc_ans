@@ -28,6 +28,8 @@ Supports:
 - `epoch` (current time in seconds since the Unix epoch), `pi`, `rand`
 - `ans` (last answer)
 
+Can use the `help` command in the REPL to print the manual.
+
 This is optimized for my use-case on my phone with [`termux`](https://termux.dev/en/), so it has a fast boot time, and is forgiving with whitespace/parentheses, and has aliases for the basic operators, see [about](#about) for more details.
 
 ## Installation
