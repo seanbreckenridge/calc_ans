@@ -110,7 +110,7 @@ This does not use any special integer/float to manage precision, so you get the 
 
 This is really optimized for my use-case using [`termux`](https://termux.dev/en/) on my phone.
 
-I had used [`ipython`](https://github.com/ipython/ipython) for a while, which is just a fancy REPL for python, but the boot time when using [`termux`](https://termux.dev/en/) on my phone was pretty slow. [eva](https://github.com/nerdypepper/eva) is pretty good, but `_` referring to the last answer always meant I had to switch keyboard layouts, and it wasnt the most foriving on calling functions without parentheses.
+I had used [`ipython`](https://github.com/ipython/ipython) for a while, which is just a fancy REPL for python, but the boot time when using [`termux`](https://termux.dev/en/) on my phone was pretty slow. [eva](https://github.com/nerdypepper/eva) is pretty good, but `_` referring to the last answer always meant I had to switch keyboard layouts, and it wasn't the most foriving on calling functions without parentheses.
 
 So, the goals for this were:
 
