@@ -59,7 +59,7 @@ I alias `calc_ans_rlwrap` to `c` in my shell:
 alias c='calc_ans_rlwrap'
 ```
 
-To install `opam`/`dune` to build this on `termux`, see [notes on installing opam](https://exobrain.sean.fish/devlog/ocaml_android/) and [dune issue](https://github.com/ocaml/dune/issues/8676#issuecomment-1722574714) for a patch.
+To install `opam`/`dune` to build this on `termux`, see [notes on installing opam](https://exobrain.sean.fish/devlog/ocaml_android/) and [dune issue](https://github.com/ocaml/dune/issues/8676#issuecomment-1739760304) for how to get ocaml working on android.
 
 ## Usage
 
@@ -106,7 +106,7 @@ You can also use aliases instead of the symbols:
 
 ### Precision
 
-This does not use any special integer/float to manage precision, so you get the default `2^63` precision for integers, and `IEEE 754` (64 bits) for floats. Don't use this for especially large numbers or calculations which require a lot of precision.
+This does not use any special integer/float to manage precision, so you get the default `2^63` size for integers, and `IEEE 754` (64 bits) for floats. Don't use this for especially large numbers or calculations which require a lot of precision.
 
 ### About
 
